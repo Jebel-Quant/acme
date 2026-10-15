@@ -212,8 +212,19 @@ def build_standard_form(objective: Expression, constraints: list[Constraint]) ->
     linear = canon_objective(objective, np.ones(1), ctx)
     for con in constraints:
         con.canon(ctx)
+    user_vars = _user_variables(objective, constraints, ctx)
+    variables = user_vars + ctx.aux
+    offsets, n = {}, 0
+    for v in variables:
+        offsets[v.id] = n
+        n += v.size
+    p, q, offset = _objective_matrices(linear, ctx, offsets, n)
+    a, b, cones, placed = _constraint_matrices(ctx, offsets, n)
+    return StandardForm(p, q, offset, a, b, cones, variables, offsets, placed, ctx.aux_source, len(user_vars))
 
-    # variable ordering: user variables by first appearance, then auxiliaries
+
+def _user_variables(objective: Expression, constraints: list[Constraint], ctx: CanonContext) -> list[Variable]:
+    """User variables by first appearance in the objective, then the constraints (auxiliaries excluded)."""
     user: dict[int, Variable] = {}
     for v in objective.variables():
         user.setdefault(v.id, v)
@@ -221,14 +232,13 @@ def build_standard_form(objective: Expression, constraints: list[Constraint]) ->
         for v in con.variables():
             user.setdefault(v.id, v)
     aux_ids = {v.id for v in ctx.aux}
-    user_vars = [v for v in user.values() if v.id not in aux_ids]
-    variables = user_vars + ctx.aux
-    offsets, n = {}, 0
-    for v in variables:
-        offsets[v.id] = n
-        n += v.size
+    return [v for v in user.values() if v.id not in aux_ids]
 
-    # objective
+
+def _objective_matrices(
+    linear: AffineExpr, ctx: CanonContext, offsets: dict[int, int], n: int
+) -> tuple[sp.csc_array, np.ndarray, float]:
+    """``P``, ``q`` and the constant offset from the linear part and the collected quadratic terms."""
     q = linear.coefficient_matrix(offsets, n).toarray().ravel()
     offset = float(linear.const[0]) if linear.const.size else 0.0
     p = sp.csc_array((n, n))
@@ -238,9 +248,13 @@ def build_standard_form(objective: Expression, constraints: list[Constraint]) ->
         p = p + 2.0 * (c.T @ m @ c)
         q = q + 2.0 * (c.T @ (m @ expr.const))
         offset += float(expr.const @ (m @ expr.const))
-    p = sp.csc_array((p + p.T) / 2.0)
+    return sp.csc_array((p + p.T) / 2.0), q, offset
 
-    # constraints, ordered by cone kind
+
+def _constraint_matrices(
+    ctx: CanonContext, offsets: dict[int, int], n: int
+) -> tuple[sp.csc_array, np.ndarray, list[ConeSpec], list[tuple[ConeBlock, slice]]]:
+    """Stack the cone blocks (ordered by cone kind) into ``b - A x in K``, merging adjacent polyhedral cones."""
     blocks = sorted(ctx.blocks, key=lambda blk: ORDER.index(blk.kind))
     a_parts, b_parts, cones, placed = [], [], [], []
     row = 0
@@ -257,4 +271,4 @@ def build_standard_form(objective: Expression, constraints: list[Constraint]) ->
                 cones.append(cone)
     a = sp.csc_array(sp.vstack(a_parts)) if a_parts else sp.csc_array((0, n))
     b = np.concatenate(b_parts) if b_parts else np.zeros(0)
-    return StandardForm(p, q, offset, a, b, cones, variables, offsets, placed, ctx.aux_source, len(user_vars))
+    return a, b, cones, placed
