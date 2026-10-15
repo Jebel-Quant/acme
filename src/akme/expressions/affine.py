@@ -56,6 +56,14 @@ class AffineExpr(Expression):
         terms = {k: (var, sp.csr_array(matrix @ coeff)) for k, (var, coeff) in self.terms.items()}
         return AffineExpr(shape, terms, matrix @ self.const)
 
+    def flatten(self) -> AffineExpr:
+        """Column-major flattening into a vector."""
+        return self.apply_linear(sp.eye_array(self.size, format="csr"), (self.size,))
+
+    def __neg__(self) -> AffineExpr:
+        """Negation."""
+        return self.apply_linear(-sp.eye_array(self.size, format="csr"), self.shape)
+
     @staticmethod
     def add_all(exprs: list[AffineExpr]) -> AffineExpr:
         """Sum of affine expressions of equal shape."""

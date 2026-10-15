@@ -120,7 +120,7 @@ class SOC(Constraint):
     def canon(self, ctx: CanonContext) -> None:
         """(t, x) in SOC."""
         t, x = (require_affine(a, "SOC") for a in self.args)
-        ctx.soc(t.flatten(), x.flatten(), owner=self)  # type: ignore[arg-type]
+        ctx.soc(t.flatten(), x.flatten(), owner=self)
 
     def set_dual(self, values: np.ndarray) -> None:
         """Dual as the raw cone vector ``(u, v)``."""

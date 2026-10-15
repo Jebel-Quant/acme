@@ -103,8 +103,8 @@ class Problem:
 
     def solve(
         self, solver: str | None = None, *, warm_start: bool = False, verbose: bool = False, **solver_opts: Any
-    ) -> float:
-        """Solve the problem and return the optimal value.
+    ) -> float | None:
+        """Solve the problem and return the optimal value (``None`` without a solution or certificate).
 
         Args:
             solver: ``None`` (automatic), ``"ACTIVE_SET"`` or ``"CLARABEL"``.
@@ -130,4 +130,4 @@ class Problem:
                 self.value = float(-sense * np.inf)
             else:
                 self.value = None
-        return self.value  # type: ignore[return-value]
+        return self.value

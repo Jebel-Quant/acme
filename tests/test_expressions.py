@@ -14,6 +14,7 @@ def rng():
 
 
 def _set(*pairs):
+    """Assign values to variables."""
     for var, value in pairs:
         var.value = value
 
@@ -160,3 +161,7 @@ def test_constraint_construction():
     m = ak.Variable((2, 2))
     assert isinstance(m >> 0, ak.PSD)
     assert isinstance(m << np.eye(2), ak.PSD)
+    with pytest.raises(TypeError, match="strict"):
+        _ = x < 1
+    with pytest.raises(TypeError, match="strict"):
+        _ = x > 1

@@ -5,9 +5,9 @@ from __future__ import annotations
 import time
 from typing import TYPE_CHECKING, Any
 
-import clarabel
 import numpy as np
 import scipy.sparse as sp
+from clarabel import clarabel  # the compiled module; the package only re-exports it
 
 from akme import status as st
 from akme.cones import ConeKind, ConeSpec

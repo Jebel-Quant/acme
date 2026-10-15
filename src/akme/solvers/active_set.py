@@ -100,7 +100,7 @@ def solve_qp(
             return QPResult(status, None, None, None, iterations)
         candidates = candidates or w1
     elif working_set is None and x0 is not None:
-        candidates = list(np.flatnonzero(np.abs(h - g @ x) <= feas_tol))
+        candidates = [int(i) for i in np.flatnonzero(np.abs(h - g @ x) <= feas_tol)]
     w = _independent_working_set(ek, g, h, x, candidates, feas_tol, tol)
 
     status, x, w, y, it = _active_set(p, q, ek, g, h, x, w, max_iter - iterations, tol)
@@ -127,7 +127,7 @@ def solve(form: StandardForm, *, warm_start: bool = False, verbose: bool = False
     elapsed = time.perf_counter() - start
     if verbose:
         print(f"akme active-set: status={res.status}, iterations={res.iterations}, time={elapsed:.3g}s")
-    z = None if res.y_eq is None else np.concatenate([res.y_eq, res.y_ineq])  # type: ignore[list-item]
+    z = None if res.y_eq is None or res.y_ineq is None else np.concatenate([res.y_eq, res.y_ineq])
     return RawResult(res.status, res.x, z, res.iterations, elapsed, st.ACTIVE_SET)
 
 

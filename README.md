@@ -85,7 +85,10 @@ in, and the duals follow cvxpy's sign conventions.
 from akme import solve_qp
 
 # min ½x'Px + q'x  s.t.  E x = f,  G x <= h   (P positive semidefinite)
-res = solve_qp(P, q, E, f, G, h, x0=None, working_set=None)
+p, q = np.diag([2.0, 4.0]), np.array([-2.0, -4.0])
+e, f = np.array([[1.0, 1.0]]), np.array([1.0])
+g, h = -np.eye(2), np.zeros(2)
+res = solve_qp(p, q, e, f, g, h, x0=None, working_set=None)
 res.status, res.x, res.y_eq, res.y_ineq, res.working_set
 ```
 

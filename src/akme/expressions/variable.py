@@ -64,6 +64,7 @@ class Variable(AffineExpr):
 
     @value.setter
     def value(self, value: Any) -> None:
+        """Set (or clear with ``None``) the variable's value."""
         if value is None:
             self._value = None
             return

@@ -91,14 +91,18 @@ class Atom(Expression):
         values = [a.value for a in self.args]
         if any(v is None for v in values):
             return None
-        return unvec(_vec(self.numeric(*[np.asarray(v, dtype=float) for v in values])), self.shape)
+        return unvec(_vec(self.evaluate([np.asarray(v, dtype=float) for v in values])), self.shape)
 
     def variables(self) -> list[Variable]:
         """Variables of the arguments."""
         return unique_variables(v for a in self.args for v in a.variables())
 
-    def numeric(self, *values: np.ndarray) -> np.ndarray | float:
-        """Evaluate the atom on numeric argument values."""
+    def evaluate(self, values: list[np.ndarray]) -> np.ndarray | float:
+        """Evaluate the atom on numeric argument values (one array per argument)."""
+        return self.numeric(values[0])
+
+    def numeric(self, a: np.ndarray) -> np.ndarray | float:
+        """Evaluate a single-argument atom on a numeric value."""
         raise NotImplementedError
 
     def canon(self, ctx: CanonContext) -> AffineExpr:
@@ -146,7 +150,7 @@ class Pos(Atom):
 class Maximum(Atom):
     """Elementwise maximum of several expressions."""
 
-    def numeric(self, *values: np.ndarray) -> np.ndarray:
+    def evaluate(self, values: list[np.ndarray]) -> np.ndarray:
         """Elementwise max."""
         return np.maximum.reduce(np.broadcast_arrays(*values))
 
@@ -163,7 +167,7 @@ class Minimum(Atom):
 
     _curvature = Curvature.CONCAVE
 
-    def numeric(self, *values: np.ndarray) -> np.ndarray:
+    def evaluate(self, values: list[np.ndarray]) -> np.ndarray:
         """Elementwise min."""
         return np.minimum.reduce(np.broadcast_arrays(*values))
 
@@ -498,24 +502,24 @@ def pos(x: Any) -> Expression:
 
 def maximum(*args: Any) -> Expression:
     """Elementwise maximum of expressions (scalars broadcast)."""
-    exprs = broadcast(*(require_affine(a, "maximum") for a in args))
-    return Maximum(*exprs, shape=exprs[0].shape)  # type: ignore[arg-type]
+    exprs = [require_affine(e, "maximum") for e in broadcast(*(require_affine(a, "maximum") for a in args))]
+    return Maximum(*exprs, shape=exprs[0].shape)
 
 
 def minimum(*args: Any) -> Expression:
     """Elementwise minimum of expressions (scalars broadcast)."""
-    exprs = broadcast(*(require_affine(a, "minimum") for a in args))
-    return Minimum(*exprs, shape=exprs[0].shape)  # type: ignore[arg-type]
+    exprs = [require_affine(e, "minimum") for e in broadcast(*(require_affine(a, "minimum") for a in args))]
+    return Minimum(*exprs, shape=exprs[0].shape)
 
 
 def max(x: Any) -> Expression:  # noqa: A001
     """Largest entry."""
-    return Max(require_affine(x, "max").flatten(), shape=())  # type: ignore[arg-type]
+    return Max(require_affine(x, "max").flatten(), shape=())
 
 
 def min(x: Any) -> Expression:  # noqa: A001
     """Smallest entry."""
-    return Min(require_affine(x, "min").flatten(), shape=())  # type: ignore[arg-type]
+    return Min(require_affine(x, "min").flatten(), shape=())
 
 
 def norm(x: Any, p: float | str = 2) -> Expression:
@@ -526,7 +530,7 @@ def norm(x: Any, p: float | str = 2) -> Expression:
     if p == 1:
         return sum(abs(a))
     if p in ("inf", np.inf):
-        return NormInf(a.flatten(), shape=())  # type: ignore[arg-type]
+        return NormInf(a.flatten(), shape=())
     p = float(p)
     if p < 1:
         msg = "norm requires p >= 1"

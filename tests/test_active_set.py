@@ -10,6 +10,7 @@ from akme.solvers.active_set import solve_qp
 
 
 def _clarabel(p, q, e, f, g, h):
+    """Solve the same QP with Clarabel; return status, solution and objective."""
     a = sp.csc_matrix(np.vstack([e, g]))
     settings = clarabel.DefaultSettings()
     settings.verbose = False
@@ -19,6 +20,7 @@ def _clarabel(p, q, e, f, g, h):
 
 
 def _random_qp(rng, n, me, mi, rank=None):
+    """Random feasible convex QP; ``rank`` < n gives a semidefinite P (0: an LP)."""
     f_ = rng.standard_normal((n if rank is None else rank, n))
     p = f_.T @ f_
     q = rng.standard_normal(n)
@@ -29,6 +31,7 @@ def _random_qp(rng, n, me, mi, rank=None):
 
 
 def _check_kkt(res, p, q, e, f, g, h, tol=1e-7):
+    """Assert primal feasibility, dual feasibility, stationarity and complementarity."""
     x = res.x
     assert np.abs(e @ x - f).max(initial=0) < tol
     assert (g @ x - h).max(initial=-1) < tol

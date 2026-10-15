@@ -17,7 +17,7 @@ import scipy.sparse as sp
 from akme.atoms import Atom
 from akme.cones import ORDER, ConeKind, ConeSpec, svec_matrix
 from akme.expressions.affine import AffineExpr, Constant, vstack_affine
-from akme.expressions.expression import AddExpr, Expression, LinMapExpr, as_expr, broadcast, vec
+from akme.expressions.expression import AddExpr, Expression, LinMapExpr, as_expr, broadcast, require_affine, vec
 from akme.expressions.variable import Variable
 
 if TYPE_CHECKING:
@@ -54,11 +54,12 @@ class CanonContext:
 
     # -------------------------------------------------------------------- cones
     def _block(self, kind: ConeKind, expr: Any, cones: list[ConeSpec], owner: Constraint | None) -> None:
+        """Append the flattened affine rows ``expr`` as a block of ``cones``."""
         expr = as_expr(expr)
         if not isinstance(expr, AffineExpr):
             msg = "cone rows must be affine"
             raise TypeError(msg)
-        self.blocks.append(ConeBlock(kind, expr.flatten(), cones, owner))  # type: ignore[arg-type]
+        self.blocks.append(ConeBlock(kind, expr.flatten(), cones, owner))
 
     def zero(self, expr: Any, owner: Constraint | None = None) -> None:
         """``expr == 0``."""
@@ -72,7 +73,7 @@ class CanonContext:
 
     def soc(self, t: Any, x: Any, owner: Constraint | None = None) -> None:
         """``||x||_2 <= t`` for scalar ``t``."""
-        rows = vstack_affine([as_expr(t).flatten(), as_expr(x).flatten()])  # type: ignore[list-item]
+        rows = vstack_affine([require_affine(t, "SOC").flatten(), require_affine(x, "SOC").flatten()])
         self._block(ConeKind.SOC, rows, [ConeSpec(ConeKind.SOC, rows.size)], owner)
 
     def soc3(self, t: Any, u: Any, v: Any, owner: Constraint | None = None) -> None:
@@ -105,9 +106,9 @@ class CanonContext:
 
 def _interleave(*parts: Any) -> tuple[AffineExpr, int]:
     """Broadcast parts to one size ``k`` and interleave them as ``(p0_0, p1_0, p2_0, p0_1, ...)``."""
-    exprs = [e.flatten() for e in broadcast(*(as_expr(p).flatten() for p in parts))]
+    exprs = [require_affine(e, "cone").flatten() for e in broadcast(*(as_expr(p).flatten() for p in parts))]
     k, m = exprs[0].size, len(exprs)
-    stacked = vstack_affine(exprs)  # type: ignore[arg-type]
+    stacked = vstack_affine(exprs)
     perm = (np.arange(m)[None, :] * k + np.arange(k)[:, None]).ravel()
     return stacked.apply_linear(sp.csr_array((np.ones(k * m), (np.arange(k * m), perm))), (k * m,)), k
 

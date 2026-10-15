@@ -251,7 +251,7 @@ class Expression:
         return power(self, p)
 
     # ------------------------------------------------------------ constraints
-    def __eq__(self, other: object) -> Constraint:  # type: ignore[override]
+    def __eq__(self, other: object) -> Constraint:  # ty: ignore[invalid-method-override] - builds a constraint
         """Equality constraint."""
         from akme.constraints import Equality
 
@@ -262,6 +262,16 @@ class Expression:
         from akme.constraints import Inequality
 
         return Inequality(self, other)
+
+    def __lt__(self, other: Any) -> Constraint:
+        """Strict inequalities are not supported."""
+        msg = "strict inequalities are not supported; use <="
+        raise TypeError(msg)
+
+    def __gt__(self, other: Any) -> Constraint:
+        """Strict inequalities are not supported."""
+        msg = "strict inequalities are not supported; use >="
+        raise TypeError(msg)
 
     def __ge__(self, other: Any) -> Constraint:
         """Inequality constraint ``self >= other``."""
@@ -411,8 +421,9 @@ def add(*args: Any) -> Expression:
     from akme.expressions.affine import AffineExpr
 
     exprs = broadcast(*(as_expr(a) for a in args))
-    if all(isinstance(e, AffineExpr) for e in exprs):
-        return AffineExpr.add_all(exprs)  # type: ignore[arg-type]
+    affine = [e for e in exprs if isinstance(e, AffineExpr)]
+    if len(affine) == len(exprs):
+        return AffineExpr.add_all(affine)
     flat: list[Expression] = []
     for e in exprs:
         flat.extend(e.args if isinstance(e, AddExpr) else [e])
