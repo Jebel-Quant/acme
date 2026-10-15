@@ -30,15 +30,22 @@ budget = ak.sum(w) == 1
 # Polyhedral → active-set
 prob = ak.Problem(ak.Minimize(ak.quad_form(w, sigma) - mu @ w), [budget, w >= 0, w <= 0.3])
 prob.solve()
-prob.status  # 'optimal'
-prob.solver_stats.solver_name  # 'ACTIVE_SET'
-w.value, budget.dual_value
+print(prob.status, prob.solver_stats.solver_name)
+print(np.round(w.value, 3) + 0.0)  # + 0.0 prints -0.0 as 0.0
+print(round(float(budget.dual_value), 4))
 
 # Second-order cone risk limit → Clarabel
 chol = np.linalg.cholesky(sigma)
 prob = ak.Problem(ak.Maximize(mu @ w), [ak.sum(w) == 1, w >= 0, ak.norm2(chol.T @ w) <= 0.2])
 prob.solve()
-prob.solver_stats.solver_name  # 'CLARABEL'
+print(prob.status, prob.solver_stats.solver_name, round(prob.value, 4))
+```
+
+```result
+optimal ACTIVE_SET
+[0.3   0.266 0.151 0.    0.    0.    0.075 0.165 0.    0.043]
+-0.0508
+optimal CLARABEL 0.0491
 ```
 
 ## Modelling
@@ -70,8 +77,12 @@ prob.solver_stats.solver_name  # 'CLARABEL'
 prob.solve()  # automatic: ACTIVE_SET if polyhedral, else CLARABEL
 prob.solve(solver="CLARABEL", tol_gap_rel=1e-10)  # force a backend; extra kwargs are Clarabel settings
 prob.solve(warm_start=True)  # active-set starts from the variables' current values
-prob.is_polyhedral()  # which backend the automatic choice picks
+print(prob.is_polyhedral())  # which backend the automatic choice picks
 prob.get_problem_data()  # conic standard form: min ½x'Px + q'x  s.t. Ax + s = b, s ∈ K
+```
+
+```result
+False
 ```
 
 After a solve, `prob.status` holds one of the cvxpy statuses (`optimal`, `infeasible`, `unbounded`,
@@ -89,7 +100,11 @@ p, q = np.diag([2.0, 4.0]), np.array([-2.0, -4.0])
 e, f = np.array([[1.0, 1.0]]), np.array([1.0])
 g, h = -np.eye(2), np.zeros(2)
 res = solve_qp(p, q, e, f, g, h, x0=None, working_set=None)
-res.status, res.x, res.y_eq, res.y_ineq, res.working_set
+print(res.status, np.round(res.x, 4), np.round(res.y_eq, 4), res.working_set)
+```
+
+```result
+optimal [0.3333 0.6667] [1.3333] []
 ```
 
 The solver uses the primal active-set method (Nocedal & Wright, Alg. 16.3) in the null space of the
