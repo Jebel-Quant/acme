@@ -5,6 +5,7 @@ import numpy as np
 import pytest
 
 import akme as ak
+from akme.solvers import active_set
 
 
 @pytest.fixture
@@ -113,6 +114,28 @@ def test_quadratic_constraint(market):
     assert p_ak.value == pytest.approx(p_cp.value, abs=1e-6)
 
 
+def test_square_objective_and_constraint():
+    """Square in the objective (quadratic term) and in a constraint (SOC epigraph)."""
+    rng = np.random.default_rng(6)
+    a = rng.standard_normal(5)
+    x, xc = ak.Variable(5), cp.Variable(5)
+    p_ak, p_cp = _both(
+        lambda: ak.Problem(ak.Minimize(ak.sum(ak.square(x - a))), [ak.sum(x) == 1]),
+        lambda: cp.Problem(cp.Minimize(cp.sum(cp.square(xc - a))), [cp.sum(xc) == 1]),
+    )
+    assert p_ak.solver_stats.solver_name == ak.ACTIVE_SET
+    assert p_ak.value == pytest.approx(p_cp.value, abs=1e-6)
+    np.testing.assert_allclose(x.value, xc.value, atol=1e-5)
+
+    p_ak, p_cp = _both(
+        lambda: ak.Problem(ak.Maximize(a @ x), [ak.square(x) <= 0.5]),
+        lambda: cp.Problem(cp.Maximize(a @ xc), [cp.square(xc) <= 0.5]),
+    )
+    assert p_ak.solver_stats.solver_name == ak.CLARABEL
+    assert p_ak.value == pytest.approx(p_cp.value, abs=1e-6)
+    np.testing.assert_allclose(x.value, xc.value, atol=1e-5)
+
+
 def test_nearest_correlation_psd():
     """Nearest correlation psd."""
     rng = np.random.default_rng(1)
@@ -145,6 +168,21 @@ def test_lambda_max_and_psd_dual():
     prob = ak.Problem(ak.Minimize(ak.trace(x)), [x >> np.diag([1.0, 2.0, 3.0])])
     assert prob.solve() == pytest.approx(6.0, abs=1e-6)
     np.testing.assert_allclose(prob.constraints[0].dual_value, np.eye(3), atol=1e-5)
+
+
+def test_lambda_min_constraint():
+    """Nearest symmetric matrix with a floor on its smallest eigenvalue."""
+    rng = np.random.default_rng(7)
+    a = (lambda m: (m + m.T) / 2)(rng.standard_normal((4, 4)))
+    x, xc = ak.Variable((4, 4), symmetric=True), cp.Variable((4, 4), symmetric=True)
+    p_ak, p_cp = _both(
+        lambda: ak.Problem(ak.Minimize(ak.sum_squares(x - a)), [ak.lambda_min(x) >= 0.5]),
+        lambda: cp.Problem(cp.Minimize(cp.sum_squares(xc - a)), [cp.lambda_min(xc) >= 0.5]),
+    )
+    assert p_ak.solver_stats.solver_name == ak.CLARABEL
+    assert p_ak.value == pytest.approx(p_cp.value, abs=1e-6)
+    np.testing.assert_allclose(x.value, xc.value, atol=1e-5)
+    assert ak.lambda_min(x).value == pytest.approx(0.5, abs=1e-6)
 
 
 def test_entropy_maximization():
@@ -226,6 +264,27 @@ def test_solver_override_and_errors():
         soc.solve(solver="ACTIVE_SET")
     with pytest.raises(ValueError, match="unknown solver"):
         soc.solve(solver="GUROBI")
+    with pytest.raises(ValueError, match="polyhedral"):
+        active_set.solve(soc.get_problem_data())
+
+
+def test_clarabel_settings():
+    """Solver options are passed to Clarabel; unknown ones are rejected."""
+    x = ak.Variable(3)
+    prob = ak.Problem(ak.Minimize(ak.norm2(x - 1)), [ak.sum(x) == 1])
+    prob.solve(max_iter=1)
+    assert prob.solver_stats.solver_name == ak.CLARABEL
+    assert prob.status == ak.USER_LIMIT
+    assert prob.solve(max_iter=100) == pytest.approx(np.sqrt(4 / 3), abs=1e-6)
+    with pytest.raises(ValueError, match="unknown Clarabel setting"):
+        prob.solve(bogus=1)
+
+
+def test_active_set_verbose(capsys):
+    """Verbose active-set solves print a one-line summary."""
+    x = ak.Variable(2)
+    ak.Problem(ak.Minimize(ak.sum_squares(x)), [x >= 1]).solve(verbose=True)
+    assert "akme active-set: status=optimal" in capsys.readouterr().out
 
 
 def test_infeasible_and_unbounded():
