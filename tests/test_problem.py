@@ -1,5 +1,7 @@
 """End-to-end problems compared with cvxpy, solver dispatch, statuses and duals."""
 
+import logging
+
 import cvxpy as cp
 import numpy as np
 import pytest
@@ -280,8 +282,19 @@ def test_clarabel_settings():
         prob.solve(bogus=1)
 
 
-def test_active_set_verbose(capsys):
-    """Verbose active-set solves print a one-line summary."""
+def test_active_set_verbose(caplog):
+    """Verbose active-set solves log a one-line summary at INFO."""
+    x = ak.Variable(2)
+    with caplog.at_level(logging.INFO, logger="akme"):
+        ak.Problem(ak.Minimize(ak.sum_squares(x)), [x >= 1]).solve(verbose=True)
+    assert "akme active-set: status=optimal" in caplog.text
+
+
+def test_active_set_verbose_without_logging_config(capsys, monkeypatch):
+    """Without any logging configuration, verbose output still reaches stdout."""
+    monkeypatch.setattr(active_set.logger, "handlers", [])
+    monkeypatch.setattr(active_set.logger, "propagate", False)
+    monkeypatch.setattr(active_set.logger, "level", logging.WARNING)  # a plain process: root at WARNING
     x = ak.Variable(2)
     ak.Problem(ak.Minimize(ak.sum_squares(x)), [x >= 1]).solve(verbose=True)
     assert "akme active-set: status=optimal" in capsys.readouterr().out

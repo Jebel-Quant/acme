@@ -16,6 +16,8 @@ problems, with warm starts from a previous point and working set.
 
 from __future__ import annotations
 
+import logging
+import sys
 import time
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
@@ -28,6 +30,8 @@ from akme.solvers.base import RawResult
 
 if TYPE_CHECKING:
     from akme.canon import StandardForm
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -129,12 +133,25 @@ def solve(form: StandardForm, *, warm_start: bool = False, verbose: bool = False
     res = solve_qp(form.p.toarray(), form.q, a[:meq], form.b[:meq], a[meq:], form.b[meq:], x0=x0, **options)
     elapsed = time.perf_counter() - start
     if verbose:
-        print(f"akme active-set: status={res.status}, iterations={res.iterations}, time={elapsed:.3g}s")
+        _verbose_logger().info(
+            "akme active-set: status=%s, iterations=%d, time=%.3gs", res.status, res.iterations, elapsed
+        )
     z = None if res.y_eq is None or res.y_ineq is None else np.concatenate([res.y_eq, res.y_ineq])
     return RawResult(res.status, res.x, z, res.iterations, elapsed, st.ACTIVE_SET)
 
 
 # ------------------------------------------------------------------- internals
+def _verbose_logger() -> logging.Logger:
+    """The module logger, made to print INFO to stdout when no handler is configured anywhere."""
+    if not logger.hasHandlers():
+        handler = logging.StreamHandler(sys.stdout)
+        handler.setFormatter(logging.Formatter("%(message)s"))
+        logger.addHandler(handler)
+        if logger.getEffectiveLevel() > logging.INFO:
+            logger.setLevel(logging.INFO)
+    return logger
+
+
 def _as_arrays(
     p: Any, q: Any, e: Any, f: Any, g: Any, h: Any
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
