@@ -12,6 +12,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 import scipy.sparse as sp
 
+from akme.expressions._ops import ops
 from akme.expressions.affine import AffineExpr, Constant
 from akme.expressions.expression import (
     Curvature,
@@ -762,3 +763,7 @@ def _square_matrix(x: Any, what: str) -> AffineExpr:
         msg = f"{what} requires a square matrix"
         raise ValueError(msg)
     return a
+
+
+ops.sum = sum
+ops.power = power

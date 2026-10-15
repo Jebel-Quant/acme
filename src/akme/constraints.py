@@ -7,7 +7,9 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from akme.canon import canon_upper
 from akme.cones import smat
+from akme.expressions._ops import ops
 from akme.expressions.expression import Expression, add, as_expr, require_affine, unique_variables, unvec
 
 if TYPE_CHECKING:
@@ -81,8 +83,6 @@ class Inequality(Constraint):
 
     def canon(self, ctx: CanonContext) -> None:
         """Epigraph-canonicalize ``lhs - rhs`` and require ``rhs - lhs >= 0``."""
-        from akme.canon import canon_upper
-
         ctx.nonneg(-canon_upper(self.args[0], ctx), owner=self)
 
 
@@ -163,3 +163,8 @@ class PowCone3D(Constraint):
     def set_dual(self, values: np.ndarray) -> None:
         """Dual as an ``(k, 3)`` array, one row per cone."""
         self._dual = np.asarray(values, dtype=float).reshape(-1, 3)
+
+
+ops.equality = Equality
+ops.inequality = Inequality
+ops.psd = PSD
