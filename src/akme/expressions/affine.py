@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 import scipy.sparse as sp
 
+from akme.expressions._ops import ops
 from akme.expressions.expression import Curvature, Expression, unvec, vec
 
 if TYPE_CHECKING:
@@ -114,3 +115,7 @@ def vstack_affine(exprs: list[AffineExpr]) -> AffineExpr:
         pieces.append(e.apply_linear(embed, (total,)))
         start += size
     return AffineExpr.add_all(pieces)
+
+
+ops.affine = AffineExpr
+ops.constant = Constant
