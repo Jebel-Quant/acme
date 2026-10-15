@@ -89,14 +89,8 @@ def solve_qp(
         >>> res.y_ineq.round(6).tolist()
         [2.0]
     """
-    q = np.asarray(q, dtype=float).ravel()
-    n = q.size
-    p = np.asarray(p, dtype=float).reshape(n, n)
-    e = np.zeros((0, n)) if e is None else np.asarray(e, dtype=float).reshape(-1, n)
-    f = np.zeros(0) if f is None else np.asarray(f, dtype=float).ravel()
-    g = np.zeros((0, n)) if g is None else np.asarray(g, dtype=float).reshape(-1, n)
-    h = np.zeros(0) if h is None else np.asarray(h, dtype=float).ravel()
-    me, mi = e.shape[0], g.shape[0]
+    p, q, e, f, g, h = _as_arrays(p, q, e, f, g, h)
+    n, me, mi = q.size, e.shape[0], g.shape[0]
     max_iter = max_iter or 10 * (n + me + mi) + 50
     feas_tol = tol * max(1.0, np.max(np.abs(h), initial=0.0), np.max(np.abs(f), initial=0.0))
 
@@ -109,15 +103,11 @@ def solve_qp(
         if np.max(np.abs(e @ x - f), initial=0.0) > 1e3 * feas_tol:
             return QPResult(st.INFEASIBLE, None, None, None, 0)
 
-    iterations = 0
-    candidates = list(working_set or [])
-    if mi and np.max(g @ x - h) > feas_tol:
-        status, x, w1, iterations = _phase_one(ek, g, h, x, max_iter, tol, feas_tol)
-        if status != st.OPTIMAL:
-            return QPResult(status, None, None, None, iterations)
-        candidates = candidates or w1
-    elif working_set is None and x0 is not None:
-        candidates = [int(i) for i in np.flatnonzero(np.abs(h - g @ x) <= feas_tol)]
+    status, x, candidates, iterations = _starting_point(
+        ek, g, h, x, working_set, warm=x0 is not None, max_iter=max_iter, tol=tol, feas_tol=feas_tol
+    )
+    if status != st.OPTIMAL:
+        return QPResult(status, None, None, None, iterations)
     w = _independent_working_set(ek, g, h, x, candidates, feas_tol, tol)
 
     status, x, w, y, it = _active_set(p, q, ek, g, h, x, w, max_iter - iterations, tol)
@@ -160,6 +150,41 @@ def _verbose_logger() -> logging.Logger:
         if logger.getEffectiveLevel() > logging.INFO:
             logger.setLevel(logging.INFO)
     return logger
+  
+def _as_arrays(
+    p: Any, q: Any, e: Any, f: Any, g: Any, h: Any
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    """Float arrays of consistent shape; missing equality or inequality blocks become empty."""
+    q = np.asarray(q, dtype=float).ravel()
+    n = q.size
+    p = np.asarray(p, dtype=float).reshape(n, n)
+    e = np.zeros((0, n)) if e is None else np.asarray(e, dtype=float).reshape(-1, n)
+    f = np.zeros(0) if f is None else np.asarray(f, dtype=float).ravel()
+    g = np.zeros((0, n)) if g is None else np.asarray(g, dtype=float).reshape(-1, n)
+    h = np.zeros(0) if h is None else np.asarray(h, dtype=float).ravel()
+    return p, q, e, f, g, h
+
+
+def _starting_point(
+    e: np.ndarray,
+    g: np.ndarray,
+    h: np.ndarray,
+    x: np.ndarray,
+    working_set: list[int] | None,
+    *,
+    warm: bool,
+    max_iter: int,
+    tol: float,
+    feas_tol: float,
+) -> tuple[str, np.ndarray, list[int], int]:
+    """Feasible ``x`` (phase 1 if needed) and candidate active rows: status, x, candidates, iterations."""
+    candidates = list(working_set or [])
+    if g.shape[0] and np.max(g @ x - h) > feas_tol:
+        status, x, w1, iterations = _phase_one(e, g, h, x, max_iter, tol, feas_tol)
+        return status, x, candidates or w1, iterations
+    if working_set is None and warm:
+        candidates = [int(i) for i in np.flatnonzero(np.abs(h - g @ x) <= feas_tol)]
+    return st.OPTIMAL, x, candidates, 0
 
 
 def _independent_rows(e: np.ndarray, tol: float) -> np.ndarray:
@@ -233,6 +258,40 @@ def _direction(
     return d, False
 
 
+def _ratio_test(
+    g: np.ndarray,
+    h: np.ndarray,
+    x: np.ndarray,
+    d: np.ndarray,
+    w: list[int],
+    *,
+    ray: bool,
+    tol: float,
+    row_norms: np.ndarray,
+) -> tuple[float, int | None]:
+    """Step length along ``d`` and the first blocking inactive constraint (``None`` if none blocks)."""
+    gd = g @ d
+    moving = gd > tol * row_norms * np.linalg.norm(d)
+    moving[w] = False
+    alpha, block = (np.inf if ray else 1.0), None
+    if np.any(moving):
+        idx = np.flatnonzero(moving)
+        ratios = np.maximum(h[idx] - g[idx] @ x, 0.0) / gd[idx]
+        k = int(np.argmin(ratios))
+        if ratios[k] <= alpha:
+            alpha, block = float(ratios[k]), int(idx[k])
+    return alpha, block
+
+
+def _multipliers(aw: np.ndarray, grad: np.ndarray, me: int, tol: float) -> tuple[np.ndarray, int | None]:
+    """Lagrange multipliers at a stationary point, and the working-set position to drop (``None`` if optimal)."""
+    y = np.linalg.lstsq(aw.T, -grad, rcond=None)[0] if aw.shape[0] else np.zeros(0)
+    mu = y[me:]
+    if mu.size == 0 or np.min(mu) >= -tol * max(1.0, float(np.linalg.norm(grad))):
+        return y, None
+    return y, int(np.argmin(mu))
+
+
 def _active_set(
     p: np.ndarray,
     q: np.ndarray,
@@ -255,24 +314,13 @@ def _active_set(
         d, ray = _direction(p, grad, z, x, tol)
 
         if d is None:
-            y = np.linalg.lstsq(aw.T, -grad, rcond=None)[0] if aw.shape[0] else np.zeros(0)
-            mu = y[me:]
-            if mu.size == 0 or np.min(mu) >= -tol * max(1.0, float(np.linalg.norm(grad))):
+            y, drop = _multipliers(aw, grad, me, tol)
+            if drop is None:
                 return st.OPTIMAL, x, w, y, it
-            w.pop(int(np.argmin(mu)))
+            w.pop(drop)
             continue
 
-        # ratio test over inactive constraints moving towards their bound
-        gd = g @ d
-        moving = gd > tol * row_norms * np.linalg.norm(d)
-        moving[w] = False
-        alpha, block = (np.inf if ray else 1.0), None
-        if np.any(moving):
-            idx = np.flatnonzero(moving)
-            ratios = np.maximum(h[idx] - g[idx] @ x, 0.0) / gd[idx]
-            k = int(np.argmin(ratios))
-            if ratios[k] <= alpha:
-                alpha, block = float(ratios[k]), int(idx[k])
+        alpha, block = _ratio_test(g, h, x, d, w, ray=ray, tol=tol, row_norms=row_norms)
         if block is None and ray:
             return st.UNBOUNDED, x, w, np.zeros(0), it
         x = x + alpha * d

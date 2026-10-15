@@ -15,6 +15,8 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 import scipy.sparse as sp
 
+from akme.expressions._ops import ops
+
 if TYPE_CHECKING:
     from akme.constraints import Constraint
     from akme.expressions.affine import AffineExpr
@@ -191,9 +193,7 @@ class Expression:
 
     def sum(self, axis: int | None = None) -> Expression:
         """Sum of entries, optionally along ``axis``."""
-        from akme.atoms import sum as sum_
-
-        return sum_(self, axis=axis)
+        return ops.sum(self, axis=axis)
 
     # ---------------------------------------------------------------- algebra
     def __add__(self, other: Any) -> Expression:
@@ -246,22 +246,16 @@ class Expression:
 
     def __pow__(self, p: float) -> Expression:
         """Elementwise power (see :func:`akme.power`)."""
-        from akme.atoms import power
-
-        return power(self, p)
+        return ops.power(self, p)
 
     # ------------------------------------------------------------ constraints
     def __eq__(self, other: object) -> Constraint:  # ty: ignore[invalid-method-override] - builds a constraint
         """Equality constraint."""
-        from akme.constraints import Equality
-
-        return Equality(self, other)
+        return ops.equality(self, other)
 
     def __le__(self, other: Any) -> Constraint:
         """Inequality constraint ``self <= other``."""
-        from akme.constraints import Inequality
-
-        return Inequality(self, other)
+        return ops.inequality(self, other)
 
     def __lt__(self, other: Any) -> Constraint:
         """Strict inequalities are not supported."""
@@ -275,33 +269,23 @@ class Expression:
 
     def __ge__(self, other: Any) -> Constraint:
         """Inequality constraint ``self >= other``."""
-        from akme.constraints import Inequality
-
-        return Inequality(other, self)
+        return ops.inequality(other, self)
 
     def __rshift__(self, other: Any) -> Constraint:
         """Semidefinite constraint ``self - other >> 0``."""
-        from akme.constraints import PSD
-
-        return PSD(self - as_expr(other))
+        return ops.psd(self - as_expr(other))
 
     def __rrshift__(self, other: Any) -> Constraint:
         """Reflected semidefinite constraint."""
-        from akme.constraints import PSD
-
-        return PSD(as_expr(other) - self)
+        return ops.psd(as_expr(other) - self)
 
     def __lshift__(self, other: Any) -> Constraint:
         """Semidefinite constraint ``other - self >> 0``."""
-        from akme.constraints import PSD
-
-        return PSD(as_expr(other) - self)
+        return ops.psd(as_expr(other) - self)
 
     def __rlshift__(self, other: Any) -> Constraint:
         """Reflected semidefinite constraint."""
-        from akme.constraints import PSD
-
-        return PSD(self - as_expr(other))
+        return ops.psd(self - as_expr(other))
 
 
 class LinMapExpr(Expression):
@@ -385,9 +369,7 @@ def as_expr(value: Any) -> Expression:
     """Convert numbers / arrays to constant expressions; expressions pass through."""
     if isinstance(value, Expression):
         return value
-    from akme.expressions.affine import Constant
-
-    return Constant(value)
+    return ops.constant(value)
 
 
 def constant_value(expr: Expression) -> np.ndarray:
@@ -418,12 +400,10 @@ def broadcast(*exprs: Expression) -> list[Expression]:
 
 def add(*args: Any) -> Expression:
     """Sum of expressions (scalars broadcast)."""
-    from akme.expressions.affine import AffineExpr
-
     exprs = broadcast(*(as_expr(a) for a in args))
-    affine = [e for e in exprs if isinstance(e, AffineExpr)]
+    affine = [e for e in exprs if isinstance(e, ops.affine)]
     if len(affine) == len(exprs):
-        return AffineExpr.add_all(affine)
+        return ops.affine.add_all(affine)
     flat: list[Expression] = []
     for e in exprs:
         flat.extend(e.args if isinstance(e, AddExpr) else [e])
@@ -465,10 +445,8 @@ def matmul(a: Any, b: Any) -> Expression:
 
 def require_affine(value: Any, what: str) -> AffineExpr:
     """Convert to an expression and require it to be affine (atom arguments)."""
-    from akme.expressions.affine import AffineExpr
-
     expr = as_expr(value)
-    if not isinstance(expr, AffineExpr):
+    if not isinstance(expr, ops.affine):
         msg = f"argument of {what} must be affine, got {expr.curvature.value} expression"
         raise DCPError(msg)
     return expr
