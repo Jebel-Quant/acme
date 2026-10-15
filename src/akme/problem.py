@@ -111,6 +111,17 @@ class Problem:
             warm_start: Start the active-set solver from the variables' current values.
             verbose: Print solver output.
             **solver_opts: Backend options (Clarabel settings, or ``max_iter`` / ``tol`` for active-set).
+
+        Example:
+            >>> import akme as ak
+            >>> x = ak.Variable(2)
+            >>> prob = ak.Problem(ak.Maximize(ak.sum(x)), [ak.norm2(x) <= 1])
+            >>> round(prob.solve(), 6)
+            1.414214
+            >>> prob.status, prob.solver_stats.solver_name
+            ('optimal', 'CLARABEL')
+            >>> x.value.round(6).tolist()
+            [0.707107, 0.707107]
         """
         form = self.get_problem_data()
         raw = dispatch.solve(form, solver, warm_start=warm_start, verbose=verbose, **solver_opts)

@@ -71,6 +71,19 @@ def solve_qp(
         working_set: Optional initial guess of active inequality indices.
         max_iter: Iteration limit (default ``10 (n + me + mi) + 50``).
         tol: Relative tolerance for feasibility, optimality and rank decisions.
+
+    Example:
+        Minimise ``(x1 - 1)^2 + (x2 - 2)^2`` subject to ``x1 + x2 <= 1``:
+
+        >>> import numpy as np
+        >>> from akme import solve_qp
+        >>> res = solve_qp(2 * np.eye(2), np.array([-2.0, -4.0]), g=np.array([[1.0, 1.0]]), h=np.array([1.0]))
+        >>> res.status
+        'optimal'
+        >>> bool(np.allclose(res.x, [0.0, 1.0]))
+        True
+        >>> res.y_ineq.round(6).tolist()
+        [2.0]
     """
     q = np.asarray(q, dtype=float).ravel()
     n = q.size

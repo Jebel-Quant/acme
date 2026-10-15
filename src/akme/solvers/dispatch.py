@@ -13,7 +13,19 @@ if TYPE_CHECKING:
 
 
 def choose_solver(form: StandardForm, solver: str | None = None) -> str:
-    """Name of the backend used for ``form`` (``solver`` overrides the automatic choice)."""
+    """Name of the backend used for ``form`` (``solver`` overrides the automatic choice).
+
+    Example:
+        >>> import akme as ak
+        >>> from akme.solvers import choose_solver
+        >>> x = ak.Variable(2)
+        >>> qp = ak.Problem(ak.Minimize(ak.sum_squares(x)), [x >= 1])
+        >>> socp = ak.Problem(ak.Minimize(ak.sum(x)), [ak.norm2(x) <= 1])
+        >>> choose_solver(qp.get_problem_data()), choose_solver(socp.get_problem_data())
+        ('ACTIVE_SET', 'CLARABEL')
+        >>> choose_solver(qp.get_problem_data(), "clarabel")
+        'CLARABEL'
+    """
     if solver is None:
         return st.ACTIVE_SET if form.is_polyhedral else st.CLARABEL
     solver = solver.upper()

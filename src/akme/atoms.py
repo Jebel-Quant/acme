@@ -523,7 +523,18 @@ def min(x: Any) -> Expression:  # noqa: A001
 
 
 def norm(x: Any, p: float | str = 2) -> Expression:
-    """Vector p-norm of the flattened argument (``p`` in [1, inf], ``"fro"`` = 2)."""
+    """Vector p-norm of the flattened argument (``p`` in [1, inf], ``"fro"`` = 2).
+
+    Example:
+        >>> import numpy as np
+        >>> import akme as ak
+        >>> x = ak.Variable(2)
+        >>> x.value = np.array([3.0, -4.0])
+        >>> float(ak.norm(x).value), float(ak.norm(x, 1).value), float(ak.norm(x, "inf").value)
+        (5.0, 7.0, 4.0)
+        >>> ak.norm(x).curvature
+        <Curvature.CONVEX: 'convex'>
+    """
     a = require_affine(x, "norm")
     if p in ("fro", 2):
         return Norm2(a, shape=())
@@ -570,7 +581,18 @@ def square(x: Any) -> Expression:
 
 
 def quad_form(x: Any, s: Any) -> Expression:
-    """Quadratic form ``x^T S x`` with constant semidefinite ``S``."""
+    """Quadratic form ``x^T S x`` with constant semidefinite ``S``.
+
+    Example:
+        >>> import numpy as np
+        >>> import akme as ak
+        >>> x = ak.Variable(2)
+        >>> x.value = np.array([3.0, -4.0])
+        >>> float(ak.quad_form(x, np.diag([1.0, 2.0])).value)
+        41.0
+        >>> ak.quad_form(x, np.eye(2)).curvature
+        <Curvature.CONVEX: 'convex'>
+    """
     a = require_affine(x, "quad_form")
     s = np.asarray(as_expr(s).value, dtype=float)
     if s.ndim != 2 or s.shape[0] != s.shape[1] or s.shape[0] != a.size:
@@ -598,7 +620,18 @@ def entr(x: Any) -> Expression:
 
 
 def log_sum_exp(x: Any) -> Expression:
-    """``log(sum(exp(x)))``."""
+    """``log(sum(exp(x)))``.
+
+    Example:
+        >>> import numpy as np
+        >>> import akme as ak
+        >>> x = ak.Variable(3)
+        >>> x.value = np.zeros(3)
+        >>> round(float(ak.log_sum_exp(x).value), 6) == round(float(np.log(3)), 6)
+        True
+        >>> ak.log_sum_exp(x).curvature
+        <Curvature.CONVEX: 'convex'>
+    """
     return LogSumExp(require_affine(x, "log_sum_exp"), shape=())
 
 
