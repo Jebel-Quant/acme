@@ -8,13 +8,17 @@ classifiers = [
 ]
 name = "akme"
 version = "0.1.0"
-description = "akme \u2014 Jebel Quant project (description TBD)."
+description = "cvxpy-style convex QP modelling: own active-set solver for polyhedral problems, Clarabel for conic ones."
 readme = "README.md"
 authors = [
     { name = "Thomas Schmelzer", email = "thomas.schmelzer@gmail.com" }
 ]
 requires-python = ">=3.12"
-dependencies = []
+dependencies = [
+    "clarabel>=0.11.1",
+    "numpy>=2.5.4",
+    "scipy>=1.18.1",
+]
 
 [build-system]
 requires = ["uv_build>=0.13.0,<0.14.0"]
@@ -25,7 +29,11 @@ Homepage = "https://github.com/Jebel-Quant/akme"
 Repository = "https://github.com/Jebel-Quant/akme"
 
 [dependency-groups]
-test = ["pytest>=8.0", "pytest-cov>=5.0"]
+test = [
+    "cvxpy>=1.9.3",
+    "pytest>=8.0",
+    "pytest-cov>=5.0",
+]
 
 [tool.bumpversion]
 current_version = "0.1.0"
