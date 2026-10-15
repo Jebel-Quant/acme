@@ -150,7 +150,8 @@ def _verbose_logger() -> logging.Logger:
         if logger.getEffectiveLevel() > logging.INFO:
             logger.setLevel(logging.INFO)
     return logger
-  
+
+
 def _as_arrays(
     p: Any, q: Any, e: Any, f: Any, g: Any, h: Any
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
