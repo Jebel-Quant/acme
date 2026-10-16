@@ -46,3 +46,8 @@ filename = "pyproject.toml"
 regex = true
 search = '(?ms)^\[project\]((?:(?!^\[)[\s\S])*?)^version = "{current_version}"'
 replace = '[project]\1version = "{new_version}"'
+
+[tool.rhiza-task]
+# pytest-rhiza 0.7.0 doctests the README's pycon fences; rhiza-task 1.8.1 still pins 0.6.0.
+# Drop this once the synced rhiza-task pin carries 0.7.0 or later.
+pytest-rhiza = "pytest-rhiza @ git+https://github.com/Jebel-Quant/pytest-rhiza@v0.7.0"
