@@ -5,8 +5,8 @@ import numpy as np
 import pytest
 import scipy.sparse as sp
 
-import akme as ak
-from akme.solvers.active_set import _direction, solve_qp
+import acme as ak
+from acme.solvers.active_set import _direction, solve_qp
 
 
 def _clarabel(p, q, e, f, g, h):

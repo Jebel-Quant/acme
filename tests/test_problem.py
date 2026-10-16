@@ -6,8 +6,8 @@ import cvxpy as cp
 import numpy as np
 import pytest
 
-import akme as ak
-from akme.solvers import active_set
+import acme as ak
+from acme.solvers import active_set
 
 
 @pytest.fixture
@@ -20,7 +20,7 @@ def market():
 
 
 def _both(build_ak, build_cp):
-    """Solve the akme and the cvxpy formulation; return both problems."""
+    """Solve the acme and the cvxpy formulation; return both problems."""
     p_ak, p_cp = build_ak(), build_cp()
     p_ak.solve()
     p_cp.solve(solver=cp.CLARABEL)
@@ -285,9 +285,9 @@ def test_clarabel_settings():
 def test_active_set_verbose(caplog):
     """Verbose active-set solves log a one-line summary at INFO."""
     x = ak.Variable(2)
-    with caplog.at_level(logging.INFO, logger="akme"):
+    with caplog.at_level(logging.INFO, logger="acme"):
         ak.Problem(ak.Minimize(ak.sum_squares(x)), [x >= 1]).solve(verbose=True)
-    assert "akme active-set: status=optimal" in caplog.text
+    assert "acme active-set: status=optimal" in caplog.text
 
 
 def test_active_set_verbose_without_logging_config(capsys, monkeypatch):
@@ -297,7 +297,7 @@ def test_active_set_verbose_without_logging_config(capsys, monkeypatch):
     monkeypatch.setattr(active_set.logger, "level", logging.WARNING)  # a plain process: root at WARNING
     x = ak.Variable(2)
     ak.Problem(ak.Minimize(ak.sum_squares(x)), [x >= 1]).solve(verbose=True)
-    assert "akme active-set: status=optimal" in capsys.readouterr().out
+    assert "acme active-set: status=optimal" in capsys.readouterr().out
 
 
 def test_infeasible_and_unbounded():

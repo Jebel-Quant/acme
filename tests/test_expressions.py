@@ -3,8 +3,8 @@
 import numpy as np
 import pytest
 
-import akme as ak
-from akme.expressions.affine import AffineExpr
+import acme as ak
+from acme.expressions.affine import AffineExpr
 
 
 @pytest.fixture

@@ -6,19 +6,19 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from akme.atoms.affine import sum as _sum
-from akme.atoms.base import Atom
-from akme.atoms.piecewise import abs as _abs
-from akme.expressions.affine import AffineExpr
-from akme.expressions.expression import (
+from acme.atoms.affine import sum as _sum
+from acme.atoms.base import Atom
+from acme.atoms.piecewise import abs as _abs
+from acme.expressions.affine import AffineExpr
+from acme.expressions.expression import (
     DCPError,
     Expression,
     require_affine,
 )
-from akme.expressions.expression import vec as _vec
+from acme.expressions.expression import vec as _vec
 
 if TYPE_CHECKING:
-    from akme.canon import CanonContext
+    from acme.canon import CanonContext
 
 
 class NormInf(Atom):
@@ -79,7 +79,7 @@ def norm(x: Any, p: float | str = 2) -> Expression:
 
     Example:
         >>> import numpy as np
-        >>> import akme as ak
+        >>> import acme as ak
         >>> x = ak.Variable(2)
         >>> x.value = np.array([3.0, -4.0])
         >>> float(ak.norm(x).value), float(ak.norm(x, 1).value), float(ak.norm(x, "inf").value)

@@ -1,11 +1,11 @@
-"""akme -- cvxpy-style modelling of convex (quadratic) problems.
+"""acme -- cvxpy-style modelling of convex (quadratic) problems.
 
-Polyhedral problems are solved with akme's own primal active-set method,
+Polyhedral problems are solved with acme's own primal active-set method,
 everything else (second-order, PSD, exponential and power cones) with Clarabel.
 
 Example:
     >>> import numpy as np
-    >>> import akme as ak
+    >>> import acme as ak
     >>> x = ak.Variable(2)
     >>> prob = ak.Problem(ak.Minimize(ak.sum_squares(x - np.array([1.0, 2.0]))), [x <= 1])
     >>> round(prob.solve(), 6)
@@ -14,7 +14,7 @@ Example:
     'ACTIVE_SET'
 """
 
-from akme.atoms import (
+from acme.atoms import (
     abs,  # noqa: A004 - cvxpy naming
     diag,
     entr,
@@ -47,11 +47,11 @@ from akme.atoms import (
     vec,
     vstack,
 )
-from akme.constraints import PSD, SOC, Constraint, Equality, ExpCone, Inequality, PowCone3D
-from akme.expressions import Constant, Curvature, DCPError, Expression, Variable
-from akme.problem import Maximize, Minimize, Problem, SolverStats
-from akme.solvers.active_set import solve_qp
-from akme.status import (
+from acme.constraints import PSD, SOC, Constraint, Equality, ExpCone, Inequality, PowCone3D
+from acme.expressions import Constant, Curvature, DCPError, Expression, Variable
+from acme.problem import Maximize, Minimize, Problem, SolverStats
+from acme.solvers.active_set import solve_qp
+from acme.status import (
     ACTIVE_SET,
     CLARABEL,
     INFEASIBLE,

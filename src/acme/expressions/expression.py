@@ -1,7 +1,7 @@
 """Expression base class, curvature bookkeeping and generic (lazy) linear maps.
 
 All expressions are flattened in column-major (Fortran) order, as in cvxpy. Affine
-expressions are evaluated eagerly into :class:`~akme.expressions.affine.AffineExpr`;
+expressions are evaluated eagerly into :class:`~acme.expressions.affine.AffineExpr`;
 anything containing a nonlinear atom is kept as a small tree of :class:`AddExpr` and
 :class:`LinMapExpr` nodes whose leaves are atoms or affine expressions.
 """
@@ -15,16 +15,16 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 import scipy.sparse as sp
 
-from akme.expressions._ops import ops
+from acme.expressions._ops import ops
 
 if TYPE_CHECKING:
-    from akme.constraints import Constraint
-    from akme.expressions.affine import AffineExpr
-    from akme.expressions.variable import Variable
+    from acme.constraints import Constraint
+    from acme.expressions.affine import AffineExpr
+    from acme.expressions.variable import Variable
 
 
 class DCPError(ValueError):
-    """Raised when an expression or problem violates the (light) DCP rules of akme."""
+    """Raised when an expression or problem violates the (light) DCP rules of acme."""
 
 
 class Curvature(enum.Enum):
@@ -101,7 +101,7 @@ def flat_index(shape: tuple[int, ...]) -> np.ndarray:
 
 
 class Expression:
-    """Base class of all akme expressions.
+    """Base class of all acme expressions.
 
     Supports ``+ - * / @ **``, unary minus, indexing, ``.T`` and the comparisons
     ``==``, ``<=``, ``>=``, ``>>`` and ``<<`` which build constraints.
@@ -245,7 +245,7 @@ class Expression:
         return matmul(other, self)
 
     def __pow__(self, p: float) -> Expression:
-        """Elementwise power (see :func:`akme.power`)."""
+        """Elementwise power (see :func:`acme.power`)."""
         return ops.power(self, p)
 
     # ------------------------------------------------------------ constraints

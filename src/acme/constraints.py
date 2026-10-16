@@ -7,14 +7,14 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from akme.canon import canon_upper
-from akme.cones import smat
-from akme.expressions._ops import ops
-from akme.expressions.expression import Expression, add, as_expr, require_affine, unique_variables, unvec
+from acme.canon import canon_upper
+from acme.cones import smat
+from acme.expressions._ops import ops
+from acme.expressions.expression import Expression, add, as_expr, require_affine, unique_variables, unvec
 
 if TYPE_CHECKING:
-    from akme.canon import CanonContext
-    from akme.expressions.variable import Variable
+    from acme.canon import CanonContext
+    from acme.expressions.variable import Variable
 
 _ids = itertools.count()
 

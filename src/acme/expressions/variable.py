@@ -8,8 +8,8 @@ from typing import Any
 import numpy as np
 import scipy.sparse as sp
 
-from akme.expressions.affine import AffineExpr
-from akme.expressions.expression import unvec, vec
+from acme.expressions.affine import AffineExpr
+from acme.expressions.expression import unvec, vec
 
 _ids = itertools.count()
 
@@ -39,7 +39,7 @@ class Variable(AffineExpr):
         """Create a variable."""
         shape = (shape,) if isinstance(shape, int) else tuple(shape)
         if len(shape) > 2:
-            msg = "akme supports at most 2-dimensional variables"
+            msg = "acme supports at most 2-dimensional variables"
             raise ValueError(msg)
         if (symmetric or PSD) and (len(shape) != 2 or shape[0] != shape[1]):
             msg = "symmetric / PSD variables must be square matrices"

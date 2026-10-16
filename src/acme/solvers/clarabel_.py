@@ -9,12 +9,12 @@ import numpy as np
 import scipy.sparse as sp
 from clarabel import clarabel  # the compiled module; the package only re-exports it
 
-from akme import status as st
-from akme.cones import ConeKind, ConeSpec
-from akme.solvers.base import RawResult
+from acme import status as st
+from acme.cones import ConeKind, ConeSpec
+from acme.solvers.base import RawResult
 
 if TYPE_CHECKING:
-    from akme.canon import StandardForm
+    from acme.canon import StandardForm
 
 _STATUS = {
     "Solved": st.OPTIMAL,

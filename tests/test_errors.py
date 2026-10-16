@@ -4,9 +4,9 @@ import numpy as np
 import pytest
 import scipy.sparse as sp
 
-import akme as ak
-from akme.canon import CanonContext, canon_upper
-from akme.expressions.expression import LinMapExpr, broadcast_to
+import acme as ak
+from acme.canon import CanonContext, canon_upper
+from acme.expressions.expression import LinMapExpr, broadcast_to
 
 
 def test_expression_errors():
@@ -54,13 +54,13 @@ def test_constraint_errors():
 
 def test_variable_errors():
     """Variables are at most two-dimensional."""
-    with pytest.raises(ValueError, match="akme supports at most 2-dimensional variables"):
+    with pytest.raises(ValueError, match="acme supports at most 2-dimensional variables"):
         ak.Variable((2, 2, 2))
 
 
 def test_constant_errors():
     """Constants are at most two-dimensional."""
-    with pytest.raises(ValueError, match="akme supports at most 2-dimensional expressions"):
+    with pytest.raises(ValueError, match="acme supports at most 2-dimensional expressions"):
         ak.Constant(np.zeros((2, 2, 2)))
 
 

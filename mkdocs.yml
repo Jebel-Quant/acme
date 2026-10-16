@@ -1,6 +1,6 @@
 INHERIT: docs/mkdocs-base.yml
 
-site_name: "akme"
-site_description: "akme — Jebel Quant project (description TBD)."
-repo_url: "https://github.com/Jebel-Quant/akme"
-repo_name: "Jebel-Quant/akme"
+site_name: "acme"
+site_description: "acme — Jebel Quant project (description TBD)."
+repo_url: "https://github.com/Jebel-Quant/acme"
+repo_name: "Jebel-Quant/acme"

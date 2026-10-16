@@ -1,8 +1,8 @@
 """Expression system: affine expressions, variables and lazy nonlinear trees."""
 
-from akme.expressions.affine import AffineExpr, Constant
-from akme.expressions.expression import AddExpr, Curvature, DCPError, Expression, LinMapExpr, as_expr
-from akme.expressions.variable import Variable
+from acme.expressions.affine import AffineExpr, Constant
+from acme.expressions.expression import AddExpr, Curvature, DCPError, Expression, LinMapExpr, as_expr
+from acme.expressions.variable import Variable
 
 __all__ = [
     "AddExpr",

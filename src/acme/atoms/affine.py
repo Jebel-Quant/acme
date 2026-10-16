@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 import scipy.sparse as sp
 
-from akme.expressions.expression import (
+from acme.expressions.expression import (
     Expression,
     add,
     as_expr,

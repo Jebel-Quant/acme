@@ -7,11 +7,11 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 import scipy.sparse as sp
 
-from akme.expressions._ops import ops
-from akme.expressions.expression import Curvature, Expression, unvec, vec
+from acme.expressions._ops import ops
+from acme.expressions.expression import Curvature, Expression, unvec, vec
 
 if TYPE_CHECKING:
-    from akme.expressions.variable import Variable
+    from acme.expressions.variable import Variable
 
 
 class AffineExpr(Expression):
@@ -99,7 +99,7 @@ class Constant(AffineExpr):
         """Wrap a number or array."""
         arr = np.asarray(value, dtype=float)
         if arr.ndim > 2:
-            msg = "akme supports at most 2-dimensional expressions"
+            msg = "acme supports at most 2-dimensional expressions"
             raise ValueError(msg)
         super().__init__(arr.shape, None, vec(arr))
 
