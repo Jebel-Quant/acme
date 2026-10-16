@@ -78,7 +78,7 @@ def vstack(exprs: list[Any]) -> Expression:
     return _stack_like(exprs, np.vstack)
 
 
-def _stack(exprs: list[Expression]) -> Expression:
+def stack_rows(exprs: list[Expression]) -> Expression:
     """Concatenate flattened expressions into one vector."""
     sizes = [e.size for e in exprs]
     total = int(np.sum(sizes))
@@ -95,5 +95,5 @@ def _stack_like(exprs: list[Any], fn: Any) -> Expression:
     exprs = [as_expr(e) for e in exprs]
     offsets = np.cumsum([0] + [e.size for e in exprs])
     layout = fn([flat_index(e.shape) + off for e, off in zip(exprs, offsets, strict=False)])
-    stacked = _stack(exprs)
+    stacked = stack_rows(exprs)
     return stacked.apply_linear(selection_matrix(layout.flatten(order="F"), stacked.size), layout.shape)
