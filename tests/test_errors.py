@@ -5,6 +5,7 @@ import pytest
 import scipy.sparse as sp
 
 import akme as ak
+from akme.canon import CanonContext, canon_upper
 from akme.expressions.expression import LinMapExpr, broadcast_to
 
 
@@ -55,3 +56,28 @@ def test_variable_errors():
     """Variables are at most two-dimensional."""
     with pytest.raises(ValueError, match="akme supports at most 2-dimensional variables"):
         ak.Variable((2, 2, 2))
+
+
+def test_constant_errors():
+    """Constants are at most two-dimensional."""
+    with pytest.raises(ValueError, match="akme supports at most 2-dimensional expressions"):
+        ak.Constant(np.zeros((2, 2, 2)))
+
+
+def test_canonicalization_errors():
+    """Cone rows must be affine, and only known expression types can be canonicalized."""
+
+    class Opaque(ak.Expression):
+        """An expression type the canonicalizer does not know."""
+
+        shape = (1,)
+
+    ctx = CanonContext()
+    x = ak.Variable(2)
+    with pytest.raises(TypeError, match="cone rows must be affine"):
+        ctx.zero(ak.square(x))
+    with pytest.raises(TypeError, match="cone rows must be affine"):
+        ctx.nonneg(ak.abs(x))
+    with pytest.raises(TypeError, match="cannot canonicalize Opaque"):
+        canon_upper(Opaque(), ctx)
+    assert ctx.blocks == []

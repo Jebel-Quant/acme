@@ -122,6 +122,27 @@ def test_curvature():
     assert ak.quad_form(x, -np.eye(3)).curvature is ak.Curvature.CONCAVE
 
 
+C = ak.Curvature
+
+
+@pytest.mark.parametrize(
+    ("parts", "expected"),
+    [
+        ([C.CONSTANT, C.CONSTANT], C.CONSTANT),
+        ([C.CONSTANT, C.AFFINE], C.AFFINE),
+        ([C.AFFINE, C.AFFINE], C.AFFINE),
+        ([C.CONVEX, C.AFFINE, C.CONSTANT], C.CONVEX),
+        ([C.CONCAVE, C.CONCAVE], C.CONCAVE),
+        ([C.CONVEX, C.CONCAVE], C.UNKNOWN),
+        ([C.UNKNOWN, C.CONSTANT], C.UNKNOWN),
+        ([C.UNKNOWN, C.CONVEX], C.UNKNOWN),
+    ],
+)
+def test_curvature_of_sum(parts, expected):
+    """A sum is constant/affine only if every term is, one-signed if the curved terms agree, else unknown."""
+    assert C.add(parts) is expected
+
+
 def test_dcp_errors():
     """Dcp errors."""
     x = ak.Variable(3)

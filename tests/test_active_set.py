@@ -6,7 +6,7 @@ import pytest
 import scipy.sparse as sp
 
 import akme as ak
-from akme.solvers.active_set import solve_qp
+from akme.solvers.active_set import _direction, solve_qp
 
 
 def _clarabel(p, q, e, f, g, h):
@@ -133,3 +133,26 @@ def test_max_iter():
     rng = np.random.default_rng(0)
     p, q, e, f, g, h = _random_qp(rng, 10, 0, 40)
     assert solve_qp(p, q, e, f, g, h, max_iter=1).status == ak.USER_LIMIT
+
+
+def test_invalid_working_set_hints_are_ignored():
+    """Out-of-range and inactive working-set hints are dropped rather than trusted."""
+    # min (x0 - 1)^2 + (x1 - 2)^2 s.t. x0 + x1 <= 1, x0 <= 5 (inactive)  -> (0, 1)
+    p, q = 2 * np.eye(2), np.array([-2.0, -4.0])
+    g, h = np.array([[1.0, 1.0], [1.0, 0.0]]), np.array([1.0, 5.0])
+    res = solve_qp(p, q, g=g, h=h, x0=np.zeros(2), working_set=[1, 7])
+    assert res.status == ak.OPTIMAL
+    np.testing.assert_allclose(res.x, [0.0, 1.0], atol=1e-9)
+    assert res.working_set == [0]
+
+
+def test_direction_below_tolerance_is_stationary():
+    """A Newton step below the step tolerance means stationary (``None``), not a tiny move."""
+    z, x, grad = np.eye(1), np.zeros(1), np.array([1e-6])
+    d, ray = _direction(np.array([[1e12]]), grad, z, x, 1e-9)
+    assert d is None
+    assert ray is False
+    # the same gradient on a flatter Hessian is a real Newton step
+    d, ray = _direction(np.array([[1.0]]), grad, z, x, 1e-9)
+    np.testing.assert_allclose(d, [-1e-6])
+    assert ray is False

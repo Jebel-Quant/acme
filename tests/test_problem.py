@@ -344,3 +344,23 @@ def test_objective_value_and_constant_objective():
     feas = ak.Problem(ak.Minimize(0), [x >= 1, x <= 2])
     assert feas.solve() == pytest.approx(0.0)
     assert np.all(x.value >= 1 - 1e-9)
+
+
+def test_warm_start_without_values_falls_back_to_cold_start():
+    """With a user variable unset there is no warm-start point; the solve starts cold."""
+    x = ak.Variable(2)
+    prob = ak.Problem(ak.Minimize(ak.sum_squares(x - np.array([1.0, 2.0]))), [ak.sum(x) <= 1])
+    assert prob.get_problem_data().initial_point() is None
+    assert prob.solve(warm_start=True) == pytest.approx(2.0)
+    assert prob.solver_stats.solver_name == "ACTIVE_SET"
+    np.testing.assert_allclose(x.value, [0.0, 1.0], atol=1e-9)
+
+
+def test_unpack_without_duals_sets_primal_values_only():
+    """Unpacking a primal point with no duals writes the variables and leaves constraint duals unset."""
+    x = ak.Variable(2)
+    con = x >= 1
+    form = ak.Problem(ak.Minimize(ak.sum(x)), [con]).get_problem_data()
+    form.unpack(np.array([1.0, 2.0]), None)
+    np.testing.assert_allclose(x.value, [1.0, 2.0])
+    assert con.dual_value is None
