@@ -6,7 +6,7 @@ import ``expression``. Instead of importing them back (a cycle), ``expression`` 
 through :data:`ops`, and each defining module registers its implementation at import time:
 
 - :mod:`akme.expressions.affine` -- ``affine``, ``constant``
-- :mod:`akme.atoms` -- ``sum``, ``power``
+- :mod:`akme.atoms` (the package ``__init__``) -- ``sum``, ``power``
 - :mod:`akme.constraints` -- ``equality``, ``inequality``, ``psd``
 
 ``import akme`` imports all three, so the hooks are set before any user code runs.
