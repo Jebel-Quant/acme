@@ -1,23 +1,23 @@
-# akme
+# acme
 
 cvxpy-style modelling of convex (quadratic) optimisation problems with automatic solver dispatch:
 
 - **Polyhedral feasible set** (affine `==` / `<=` / `>=`, piecewise-linear atoms such as `abs`, `pos`,
-  `maximum`, `norm1`, `norm_inf`) with a linear or convex quadratic objective → akme's own
+  `maximum`, `norm1`, `norm_inf`) with a linear or convex quadratic objective → acme's own
   **primal active-set** QP solver (dense numpy, warm-startable).
 - **Anything else** (second-order, PSD, exponential and power cones) → [Clarabel](https://clarabel.org).
 
 ## Installation
 
 ```bash
-uv add akme   # or: pip install akme
+uv add acme-convex   # or: pip install acme-convex
 ```
 
 ## Quick start
 
 ```pycon
 >>> import numpy as np
->>> import akme as ak
+>>> import acme as ak
 
 >>> n = 10
 >>> rng = np.random.default_rng(0)
@@ -95,7 +95,7 @@ in, and the duals follow cvxpy's sign conventions.
 ### Using the active-set solver directly
 
 ```pycon
->>> from akme import solve_qp
+>>> from acme import solve_qp
 
 >>> # min ½x'Px + q'x  s.t.  E x = f,  G x <= h   (P positive semidefinite)
 >>> p, q = np.diag([2.0, 4.0]), np.array([-2.0, -4.0])

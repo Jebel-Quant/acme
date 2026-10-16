@@ -7,20 +7,20 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 import scipy.sparse as sp
 
-from akme.atoms.affine import stack_rows
-from akme.atoms.base import Atom
-from akme.expressions.affine import AffineExpr, Constant
-from akme.expressions.expression import (
+from acme.atoms.affine import stack_rows
+from acme.atoms.base import Atom
+from acme.expressions.affine import AffineExpr, Constant
+from acme.expressions.expression import (
     Curvature,
     DCPError,
     Expression,
     as_expr,
     require_affine,
 )
-from akme.expressions.expression import vec as _vec
+from acme.expressions.expression import vec as _vec
 
 if TYPE_CHECKING:
-    from akme.canon import CanonContext
+    from acme.canon import CanonContext
 
 
 class SumSquares(Atom):
@@ -125,7 +125,7 @@ def quad_form(x: Any, s: Any) -> Expression:
 
     Example:
         >>> import numpy as np
-        >>> import akme as ak
+        >>> import acme as ak
         >>> x = ak.Variable(2)
         >>> x.value = np.array([3.0, -4.0])
         >>> float(ak.quad_form(x, np.diag([1.0, 2.0])).value)

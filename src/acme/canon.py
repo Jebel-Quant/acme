@@ -3,7 +3,7 @@
     minimize    1/2 x^T P x + q^T x + offset
     subject to  A x + s = b,  s in K,
 
-with ``K`` a product of the cones in :mod:`akme.cones` (polyhedral rows first).
+with ``K`` a product of the cones in :mod:`acme.cones` (polyhedral rows first).
 """
 
 from __future__ import annotations
@@ -14,14 +14,14 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 import scipy.sparse as sp
 
-from akme.atoms.base import Atom
-from akme.cones import ORDER, ConeKind, ConeSpec, svec_matrix
-from akme.expressions.affine import AffineExpr, Constant, vstack_affine
-from akme.expressions.expression import AddExpr, Expression, LinMapExpr, as_expr, broadcast, require_affine, vec
-from akme.expressions.variable import Variable
+from acme.atoms.base import Atom
+from acme.cones import ORDER, ConeKind, ConeSpec, svec_matrix
+from acme.expressions.affine import AffineExpr, Constant, vstack_affine
+from acme.expressions.expression import AddExpr, Expression, LinMapExpr, as_expr, broadcast, require_affine, vec
+from acme.expressions.variable import Variable
 
 if TYPE_CHECKING:
-    from akme.constraints import Constraint
+    from acme.constraints import Constraint
 
 
 @dataclass

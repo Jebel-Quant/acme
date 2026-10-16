@@ -1,7 +1,7 @@
-"""The late-bound ``ops`` registry is complete once ``akme`` is imported."""
+"""The late-bound ``ops`` registry is complete once ``acme`` is imported."""
 
-import akme  # noqa: F401  # importing the package performs the registrations
-from akme.expressions._ops import Ops, ops
+import acme  # noqa: F401  # importing the package performs the registrations
+from acme.expressions._ops import Ops, ops
 
 
 def test_every_ops_slot_is_registered():

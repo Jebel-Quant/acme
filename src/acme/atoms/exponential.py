@@ -6,18 +6,18 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from akme.atoms.affine import sum as _sum
-from akme.atoms.base import Atom
-from akme.expressions.affine import AffineExpr, Constant
-from akme.expressions.expression import (
+from acme.atoms.affine import sum as _sum
+from acme.atoms.base import Atom
+from acme.expressions.affine import AffineExpr, Constant
+from acme.expressions.expression import (
     Curvature,
     Expression,
     require_affine,
 )
-from akme.expressions.expression import vec as _vec
+from acme.expressions.expression import vec as _vec
 
 if TYPE_CHECKING:
-    from akme.canon import CanonContext
+    from acme.canon import CanonContext
 
 
 class Exp(Atom):
@@ -113,7 +113,7 @@ def log_sum_exp(x: Any) -> Expression:
 
     Example:
         >>> import numpy as np
-        >>> import akme as ak
+        >>> import acme as ak
         >>> x = ak.Variable(3)
         >>> x.value = np.zeros(3)
         >>> round(float(ak.log_sum_exp(x).value), 6) == round(float(np.log(3)), 6)

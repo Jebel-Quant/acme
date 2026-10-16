@@ -7,16 +7,16 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 import scipy.sparse as sp
 
-from akme.atoms.base import Atom
-from akme.expressions.affine import AffineExpr
-from akme.expressions.expression import (
+from acme.atoms.base import Atom
+from acme.expressions.affine import AffineExpr
+from acme.expressions.expression import (
     Curvature,
     Expression,
     require_affine,
 )
 
 if TYPE_CHECKING:
-    from akme.canon import CanonContext
+    from acme.canon import CanonContext
 
 
 class LambdaMax(Atom):

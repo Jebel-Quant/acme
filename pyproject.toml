@@ -6,7 +6,7 @@ classifiers = [
     "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3.14",
 ]
-name = "akme"
+name = "acme-convex"
 version = "0.1.0"
 description = "cvxpy-style convex QP modelling: own active-set solver for polyhedral problems, Clarabel for conic ones."
 readme = "README.md"
@@ -24,9 +24,12 @@ dependencies = [
 requires = ["uv_build>=0.13.0,<0.14.0"]
 build-backend = "uv_build"
 
+[tool.uv.build-backend]
+module-name = "acme"
+
 [project.urls]
-Homepage = "https://github.com/Jebel-Quant/akme"
-Repository = "https://github.com/Jebel-Quant/akme"
+Homepage = "https://github.com/Jebel-Quant/acme"
+Repository = "https://github.com/Jebel-Quant/acme"
 
 [dependency-groups]
 test = [

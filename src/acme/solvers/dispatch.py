@@ -4,20 +4,20 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
-from akme import status as st
-from akme.solvers import active_set, clarabel_
+from acme import status as st
+from acme.solvers import active_set, clarabel_
 
 if TYPE_CHECKING:
-    from akme.canon import StandardForm
-    from akme.solvers.base import RawResult
+    from acme.canon import StandardForm
+    from acme.solvers.base import RawResult
 
 
 def choose_solver(form: StandardForm, solver: str | None = None) -> str:
     """Name of the backend used for ``form`` (``solver`` overrides the automatic choice).
 
     Example:
-        >>> import akme as ak
-        >>> from akme.solvers import choose_solver
+        >>> import acme as ak
+        >>> from acme.solvers import choose_solver
         >>> x = ak.Variable(2)
         >>> qp = ak.Problem(ak.Minimize(ak.sum_squares(x)), [x >= 1])
         >>> socp = ak.Problem(ak.Minimize(ak.sum(x)), [ak.norm2(x) <= 1])

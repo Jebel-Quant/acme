@@ -7,15 +7,15 @@ cone constraints, and the light DCP check only has to track signs of linear maps
 The atoms are grouped by family into submodules; everything public is re-exported here.
 """
 
-from akme.atoms.affine import diag, hstack, reshape, sum, trace, vec, vstack  # noqa: A004
-from akme.atoms.exponential import entr, exp, log, log_sum_exp
-from akme.atoms.norms import norm, norm1, norm2, norm_inf, pnorm
-from akme.atoms.piecewise import abs, max, maximum, min, minimum, pos  # noqa: A004
-from akme.atoms.powers import inv_pos, power, sqrt
-from akme.atoms.quadratic import quad_form, square, sum_squares
-from akme.atoms.spectral import lambda_max, lambda_min
-from akme.expressions._ops import ops
-from akme.expressions.expression import multiply
+from acme.atoms.affine import diag, hstack, reshape, sum, trace, vec, vstack  # noqa: A004
+from acme.atoms.exponential import entr, exp, log, log_sum_exp
+from acme.atoms.norms import norm, norm1, norm2, norm_inf, pnorm
+from acme.atoms.piecewise import abs, max, maximum, min, minimum, pos  # noqa: A004
+from acme.atoms.powers import inv_pos, power, sqrt
+from acme.atoms.quadratic import quad_form, square, sum_squares
+from acme.atoms.spectral import lambda_max, lambda_min
+from acme.expressions._ops import ops
+from acme.expressions.expression import multiply
 
 __all__ = [
     "abs",

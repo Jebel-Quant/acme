@@ -6,18 +6,18 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 
-from akme.expressions.affine import AffineExpr
-from akme.expressions.expression import (
+from acme.expressions.affine import AffineExpr
+from acme.expressions.expression import (
     Curvature,
     Expression,
     unique_variables,
     unvec,
 )
-from akme.expressions.expression import vec as _vec
+from acme.expressions.expression import vec as _vec
 
 if TYPE_CHECKING:
-    from akme.canon import CanonContext
-    from akme.expressions.variable import Variable
+    from acme.canon import CanonContext
+    from acme.expressions.variable import Variable
 
 
 class Atom(Expression):

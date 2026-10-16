@@ -6,17 +6,17 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from akme.atoms.base import Atom
-from akme.atoms.quadratic import Square
-from akme.expressions.affine import AffineExpr, Constant
-from akme.expressions.expression import (
+from acme.atoms.base import Atom
+from acme.atoms.quadratic import Square
+from acme.expressions.affine import AffineExpr, Constant
+from acme.expressions.expression import (
     Curvature,
     Expression,
     require_affine,
 )
 
 if TYPE_CHECKING:
-    from akme.canon import CanonContext
+    from acme.canon import CanonContext
 
 
 class Power(Atom):

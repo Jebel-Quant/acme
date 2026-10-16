@@ -25,11 +25,11 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 import scipy.linalg as la
 
-from akme import status as st
-from akme.solvers.base import RawResult
+from acme import status as st
+from acme.solvers.base import RawResult
 
 if TYPE_CHECKING:
-    from akme.canon import StandardForm
+    from acme.canon import StandardForm
 
 logger = logging.getLogger(__name__)
 
@@ -80,7 +80,7 @@ def solve_qp(
         Minimise ``(x1 - 1)^2 + (x2 - 2)^2`` subject to ``x1 + x2 <= 1``:
 
         >>> import numpy as np
-        >>> from akme import solve_qp
+        >>> from acme import solve_qp
         >>> res = solve_qp(2 * np.eye(2), np.array([-2.0, -4.0]), g=np.array([[1.0, 1.0]]), h=np.array([1.0]))
         >>> res.status
         'optimal'
@@ -134,7 +134,7 @@ def solve(form: StandardForm, *, warm_start: bool = False, verbose: bool = False
     elapsed = time.perf_counter() - start
     if verbose:
         _verbose_logger().info(
-            "akme active-set: status=%s, iterations=%d, time=%.3gs", res.status, res.iterations, elapsed
+            "acme active-set: status=%s, iterations=%d, time=%.3gs", res.status, res.iterations, elapsed
         )
     z = None if res.y_eq is None or res.y_ineq is None else np.concatenate([res.y_eq, res.y_ineq])
     return RawResult(res.status, res.x, z, res.iterations, elapsed, st.ACTIVE_SET)

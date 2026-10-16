@@ -7,12 +7,12 @@ from typing import Any
 
 import numpy as np
 
-from akme import status as st
-from akme.canon import StandardForm, build_standard_form
-from akme.constraints import Constraint
-from akme.expressions.expression import DCPError, Expression, as_expr, unique_variables
-from akme.expressions.variable import Variable
-from akme.solvers import dispatch
+from acme import status as st
+from acme.canon import StandardForm, build_standard_form
+from acme.constraints import Constraint
+from acme.expressions.expression import DCPError, Expression, as_expr, unique_variables
+from acme.expressions.variable import Variable
+from acme.solvers import dispatch
 
 
 class Minimize:
@@ -61,7 +61,7 @@ class Problem:
     """An optimisation problem.
 
     ``solve()`` routes polyhedral problems (affine constraints, piecewise-linear atoms,
-    quadratic objective) to akme's active-set solver and everything else to Clarabel.
+    quadratic objective) to acme's active-set solver and everything else to Clarabel.
     """
 
     def __init__(self, objective: Minimize, constraints: list[Constraint] | None = None) -> None:
@@ -84,7 +84,7 @@ class Problem:
         return self.objective.is_dcp() and all(c.is_dcp() for c in self.constraints)
 
     def get_problem_data(self) -> StandardForm:
-        """Compile to the conic standard form (see :class:`akme.canon.StandardForm`)."""
+        """Compile to the conic standard form (see :class:`acme.canon.StandardForm`)."""
         if not self.objective.is_dcp():
             kind = "convex" if self.objective.sense > 0 else "concave"
             msg = f"objective is {self.objective.expr.curvature.value}, expected {kind}"
@@ -113,7 +113,7 @@ class Problem:
             **solver_opts: Backend options (Clarabel settings, or ``max_iter`` / ``tol`` for active-set).
 
         Example:
-            >>> import akme as ak
+            >>> import acme as ak
             >>> x = ak.Variable(2)
             >>> prob = ak.Problem(ak.Maximize(ak.sum(x)), [ak.norm2(x) <= 1])
             >>> round(prob.solve(), 6)
