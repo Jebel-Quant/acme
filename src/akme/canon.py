@@ -14,7 +14,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 import scipy.sparse as sp
 
-from akme.atoms import Atom
+from akme.atoms.base import Atom
 from akme.cones import ORDER, ConeKind, ConeSpec, svec_matrix
 from akme.expressions.affine import AffineExpr, Constant, vstack_affine
 from akme.expressions.expression import AddExpr, Expression, LinMapExpr, as_expr, broadcast, require_affine, vec
