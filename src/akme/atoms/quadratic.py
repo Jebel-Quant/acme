@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 import scipy.sparse as sp
 
-from akme.atoms.affine import _stack
+from akme.atoms.affine import stack_rows
 from akme.atoms.base import Atom
 from akme.expressions.affine import AffineExpr, Constant
 from akme.expressions.expression import (
@@ -36,7 +36,7 @@ class SumSquares(Atom):
         """||a||^2 <= t  <=>  ||(t - 1, 2 a)|| <= t + 1."""
         (a,) = self.args
         t = ctx.new_var((), source=self)
-        ctx.soc(t + 1, _stack([t - 1, 2 * a.flatten()]))
+        ctx.soc(t + 1, stack_rows([t - 1, 2 * a.flatten()]))
         return t
 
     def add_quadratic(self, ctx: CanonContext, weights: np.ndarray) -> None:
